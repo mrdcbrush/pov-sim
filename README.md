@@ -1,20 +1,31 @@
-# 🚀 POV Flight Simulator 🚀
+# 🚀 PoV Flight Simulator 🚀
 
-Welcome to the POV Flight Simulator.
+Welcome to the PoV Flight Simulator
 
-This repo holds the starting points for you to complete the assigned tasks.
-
-# Links
-
-- [POV Sim spreadsheet](https://docs.google.com/spreadsheets/d/1NjyNKgT0HVhAmHKodApmUdZshkA_ccwRApL3aE1Hw8M/edit?gid=2099201327#gid=2099201327)
+- [About](#about)
+- [Getting Up and Running](#getting-up-and-running)
+  - [Prerequisites](#prerequisites)
+  - [Spin up all services](#spin-up-all-services)
+  - [Spin up the `airlines` service](#spin-up-the-airlines-service)
+  - [Spin up the `flights` service](#spin-up-the-flights-service)
+  - [Spin up the `frontend` service](#spin-up-the-frontend-service)
+- [Simulate traffic to the services](#simulate-traffic-to-the-services)
+  - [airlines-loadgen](#running-airlines-loadgen)
+  - [flights-loadgen](#running-flights-loadgen)
 
 # About
 
-Included in this repo are uninstrumented sample applications that serve as starting points for you to add instrumentation as specified in the instructions of select tasks.
+This application comprises the following services:
 
-The following applications, which are configured to run in Docker containers, expose identical API interfaces but are implemented in different languages:
-- `flight-app-js` - Express.js backend application
-- `flight-app-py` - Python Flask backend application
+| Name | Description | Tech | Quick Link |
+| :---: | :---: | :---: | :---: |
+| `airlines` | Backend service | Java Spring Boot app | http://localhost:8080/swagger-ui/index.html#/ |
+| `flights` | Backend service | Python Flask app | http://localhost:5001/apidocs/ |
+| `frontend` | Frontend service | React app | http://localhost:3000/ |
+|||
+
+The `frontend` service is a simple React app that make API requests to both the `airlines` and `flights` services.
+![alt text](resources/povsim.png)
 
 # Getting Up and Running
 
@@ -22,127 +33,172 @@ The following applications, which are configured to run in Docker containers, ex
 
 - Install [Docker](https://docs.docker.com/engine/install/) on your local machine
 - Clone this repo to your local machine
-
 ```
 git clone https://github.com/aninamu/pov-sim.git
 ```
 
-## Running flight-app-js
+## Spin up all services
 
-From the `flight-app-js` directory:
-
-Build the app
-```
-make build
-```
-
-Run the app
-```
-make run
-```
-
-Alternatively, use a single command to both build and run the app:
-```
-make start
-```
-
-The app should now be up and running at http://localhost:3000/
-
-Navigate to http://localhost:3000/api-docs/ to view the API interface and make requests
-
-## Running flight-app-py
-
-From the `flight-app-py` directory:
-
-Build the app
-```
-make build
-```
-
-Run the app
-```
-make run
-```
-
-Alternatively, use a single command to both build and run the app:
-```
-make start
-```
-
-The app should now be up and running at http://127.0.0.1:5000/
-
-Navigate to http://127.0.0.1:5000/apidocs/ to view the API interface and make requests
-
-## Cleanup
-
-The Makefiles included with each application include additional commands to stop running containers and to clean up stopped containers.
-
-To stop a container, run the following command from the app root:
-```
-make stop
-```
-
-To remove a container, run the following command from the app root:
-```
-make clean
-```
-
-## Running both apps at once (Recommended)
-
-From the project root:
-
-Run the apps
+From the project root, run all the services with the following command:
 ```
 make up
 ```
 
-- The Express app will run on http://localhost:3000/ with Swagger docs at http://localhost:3000/api-docs/
+- *The `airlines` service will run on http://localhost:8080/ with Swagger doc UI at http://localhost:8080/swagger-ui/index.html#/*
+- *The `flights` service will run on http://localhost:5001/ with Swagger doc UI at http://localhost:5001/apidocs/*
+- *The `frontend` service will run on http://localhost:3000/*
 
-- The Flask app will run on http://127.0.0.1:5000/ with Swagger docs at http://127.0.0.1:5000/apidocs/
-
-
-Stop the running apps
+Stop the services with the following command:
 ```
 make down
 ```
 
-# Batch Requests
+Continue reading to see how to spin up an individual service as opposed to running all services at once.
 
-This repo includes a shell script in `batch_requests.sh` that allows you to make batch requests to an endpoint to generate higher volumes of traffic.
+## Spin up the `airlines` service   
 
-Note: You may need to run the following command to make the script executable:
-```
-chmod +x batch_requests.sh
-```
+From the `airlines` directory:
 
-## Usage
-Running the script entails executing a shell command of this format from the base root of the repo:
+Build the app
 ```
-./batch_requests.sh <endpoint> <num_requests>
+make build
 ```
 
-### Example - Ping GET airlines endpoint 100 times
+Run the app
 ```
-./batch_requests.sh http://localhost:3000/airlines 100
+make run
+```
+*The `airlines` service will run on http://localhost:8080/ with Swagger doc UI at http://localhost:8080/swagger-ui/index.html#/*
+
+Alternatively, use a single command to both build and run the app
+```
+make start
 ```
 
-### Example - Trigger error on GET airlines endpoint 100 times
+Gracefully stop the app
 ```
-./batch_requests.sh http://localhost:3000/airlines/raise 100
-```
-
-### Example - Ping GET flights endpoint 100 times:
-```
-./batch_requests.sh http://localhost:3000/flights/AA 100
+make stop
 ```
 
-### Example - Trigger error on GET flights endpoint 100 times
+Clean up the container(s)
 ```
-./batch_requests.sh http://localhost:3000/flights/AA/raise 100
+make clean
 ```
 
-_Note: These sample commands assume the application you wish to ping is running locally at http://localhost:3000. Replace with the proper value as needed._
+## Spin up the `flights` service
 
+From the `flights` directory:
+
+Build the app
+```
+make build
+```
+
+Run the app
+```
+make run
+```
+*The `flights` service will run on http://localhost:5001/ with Swagger doc UI at http://localhost:5001/apidocs/*
+
+Alternatively, use a single command to both build and run the app
+```
+make start
+```
+
+Gracefully stop the app
+```
+make stop
+```
+
+Clean up the container(s)
+```
+make clean
+```
+
+## Spin up the `frontend` service
+
+From the `frontend` directory:
+
+Build the app
+```
+make build
+```
+
+Run the app
+```
+make run
+```
+*The `frontend` service will run on http://localhost:3000/*
+
+Gracefully stop the app
+```
+make stop
+```
+
+# Simulate traffic to the services
+
+The `scripts/` directory includes load generator scripts you can use to make batch sets of requests to your running services.
+
+- The `airlines-loadgen.sh` script generates load to the `airlines` service
+- The `flights-loadgen.sh` script generates load to the `flights` service
+
+## Running airlines-loadgen
+
+*Note: You may need to run the following command to add the proper permissions to execute the script*
+```
+chmod +x airlines-loadgen.sh
+```
+
+The `airlines-loadgen` script makes API requests to the `airlines` service. You can optionally specify the following parameters to the script:
+- An error rate `-e` to force the requests to the service to error out at that rate
+- A duration `-d` to specify the number of seconds the script should run
+- A base URL `-b` if you are running the service on a port other than the default
+
+From the `scripts/` directory:
+
+- Run the script with default params
+  ```
+  ./airlines-loadgen.sh
+  ```
+
+- View usage
+  ```
+  ./airlines-loadgen.sh -h
+  ```
+
+- Example: Run the script for 120 seconds generating a 25% error rate within the `airlines` service
+  ```
+  ./airlines-loadgen.sh -e 0.25 -d 120
+  ```
+
+## Running flights-loadgen
+
+*Note: You may need to run the following command to add the proper permissions to execute the script*
+```
+chmod +x flights-loadgen.sh
+```
+
+The `flights-loadgen` script makes API requests to the `flights` service. You can optionally specify the following parameters to the script:
+- An error rate `-e` to force the requests to the service to error out at that rate
+- A duration `-d` to specify the number of seconds the script should run
+- A base URL `-b` if you are running the service on a port other than the default
+
+From the `scripts/` directory:
+
+- Run the script with default params
+  ```
+  ./flights-loadgen.sh
+  ```
+
+- View usage
+  ```
+  ./flights-loadgen.sh -h
+  ```
+
+- Example: Run the script for 120 seconds generating a 25% error rate within the `flights` service
+  ```
+  ./flights-loadgen.sh -e 0.25 -d 120
+  ```
 
 # Deploying a Helm chart
 

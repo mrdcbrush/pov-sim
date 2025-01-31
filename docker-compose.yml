@@ -1,13 +1,20 @@
 version: '1'
 services:
-  flight-app-js:
-    build:
-      context: ./flight-app-js
+  airlines:
+    build: 
+      context: ./airlines
+    ports:
+      - "8080:8080"
+  flights:
+    build: 
+      context: ./flights
+    ports:
+      - "5001:5001"
+  frontend:
+    build: 
+      context: ./frontend
     ports:
       - "3000:3000"
-
-  flight-app-py:
-    build:
-      context: ./flight-app-py
-    ports:
-      - "5000:5000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

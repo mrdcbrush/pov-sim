@@ -1,0 +1,21 @@
+.Navigation {
+    margin: 8vh;
+    font-size: calc(6px + 2vmin);
+}
+
+.Navigation-ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.Navigation-li {
+    display: inline;
+    padding: 4px;
+}
+
+.Navigation-link {
+    padding: 12px;
+    color: aliceblue;
+    text-decoration: none;
+}
