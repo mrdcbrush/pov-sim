@@ -2,3 +2,4 @@ node_modules
 .env
 .gradle
 alloy/config.alloy
+.DS_Store
