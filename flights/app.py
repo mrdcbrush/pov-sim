@@ -1,3 +1,15 @@
+import pyroscope
+import os
+
+# Initialize Pyroscope profiling  
+pyroscope.configure(  
+    application_name=os.getenv("PYROSCOPE_APPLICATION_NAME", "flights"),  
+    server_address=os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://alloy:4040"),  
+    sample_rate=100,  
+    detect_subprocesses=True,  
+    oncpu=True,  
+)  
+
 from flasgger import Swagger
 from flask import Flask, jsonify, request
 from flask_cors import CORS

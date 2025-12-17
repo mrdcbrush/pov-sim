@@ -32,11 +32,17 @@ services:
     container_name: alloy
     ports:
       - "4317:4317"
+      - "4040:4040"
     restart: unless-stopped
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
     networks:
       - povsim
+    command:  
+      - "run"  
+      - "--server.http.listen-addr=0.0.0.0:12345"  
+      - "--stability.level=public-preview"  
+      - "/etc/alloy/config.alloy"  
 
 networks:
   povsim:

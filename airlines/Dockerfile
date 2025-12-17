@@ -20,6 +20,7 @@ WORKDIR /app
 # Copy app and agent
 COPY --from=build /app/build/libs/*.jar app.jar
 COPY ./grafana-opentelemetry-java.jar grafana-opentelemetry-java.jar
+COPY ./pyroscope.jar pyroscope.jar
 
 # Default OTEL config (override at runtime with -e)
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=airlines,service.namespace=pov-sim,deployment.environment=dev,service.version=v2"
@@ -28,8 +29,16 @@ ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ENV OTEL_METRICS_EXPORTER=console
 ENV OTEL_TRACES_EXPORTER=console,otlp
 
+# Set Pyroscope environment variables  
+ENV PYROSCOPE_APPLICATION_NAME=airlines  
+ENV PYROSCOPE_SERVER_ADDRESS=http://alloy:4040  
+ENV PYROSCOPE_FORMAT=jfr  
+ENV PYROSCOPE_PROFILER_EVENT=cpu  
+ENV PYROSCOPE_PROFILER_ALLOC=512k  
+ENV PYROSCOPE_PROFILER_LOCK=10ms  
+
 # Expose the port the application runs on
 EXPOSE 8080
 
 # Start Alloy in the background, then start the app with the Java agent
-ENTRYPOINT ["sh", "-c", "exec java -javaagent:/app/grafana-opentelemetry-java.jar -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java -javaagent:/app/grafana-opentelemetry-java.jar -javaagent:/app/pyroscope.jar -jar /app/app.jar"]  
