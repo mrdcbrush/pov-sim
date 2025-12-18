@@ -3,8 +3,8 @@ import os
 
 # Initialize Pyroscope profiling  
 pyroscope.configure(  
-    application_name=os.getenv("PYROSCOPE_APPLICATION_NAME", "flights"),  
-    server_address=os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://alloy:4040"),  
+    application_name=os.getenv("PYROSCOPE_APPLICATION_NAME", "pov-sim"),  
+    server_address=os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://localhost:4040"),  
     sample_rate=100,  
     detect_subprocesses=True,  
     oncpu=True,  

@@ -4,7 +4,7 @@ namespace: pov-sim
 
 monitoring:
   namespace: monitoring
-  alloyReceiverService: grafana-monitoring-alloy-receiver
+  alloyService: grafana-monitoring-alloy
 
 airlines:
   replicas: 1

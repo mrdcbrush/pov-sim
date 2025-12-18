@@ -28,17 +28,22 @@ spec:
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "service.name=airlines,service.namespace={{ .Values.namespace }},deployment.environment={{ .Values.environment }},service.version={{ .Values.airlines.image.tag }}"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4317"
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/traces"
+        - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/metrics"
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "gprc"
-        - name: OTEL_METRICX_EXPORTER
+          value: "http/protobuf"
+        - name: OTEL_METRICS_EXPORTER
           value: "otlp"
-        - name: PYROSCOPE_APPLICATION_NAME
-          value: "airlines"
-        - name: PYROSCOPE_SERVER_ADDRESS
-          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
-        - name: PYROSCOPE_FORMAT
-          value: "jfr"
+        # Pyroscope disabled until receiver is configured
+        #- name: PYROSCOPE_APPLICATION_NAME
+        #  value: "airlines"
+        #- name: PYROSCOPE_SERVER_ADDRESS
+        #  value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+        #- name: PYROSCOPE_FORMAT
+        #  value: "jfr"
         - name: CORS_ALLOWED_ORIGINS
           value: "*"
         livenessProbe:

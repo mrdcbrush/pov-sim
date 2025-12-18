@@ -14,6 +14,9 @@ spec:
       app.kubernetes.io/component: flights
   template:
     metadata:
+      annotations:
+        profiles.grafana.com/cpu.ebpf.enabled: "true"
+        profiles.grafana.com/memory.ebpf.enabled: "true"
       labels:
         {{- include "pov-sim.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: flights
@@ -30,17 +33,21 @@ spec:
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "service.name=flights,service.namespace={{ .Values.namespace }},deployment.environment={{ .Values.environment }},service.version={{ .Values.flights.image.tag}}"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4317"
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318"
+        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/traces"
+        - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/metrics"
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "grpc"
+          value: "http/protobuf"
         - name: OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED
           value: "true"
         - name: OTEL_METRICS_EXPORTER
           value: "otlp"
         - name: PYROSCOPE_APPLICATION_NAME
-          value: "flights"
+          value: "pov-sim"
         - name: PYROSCOPE_SERVER_ADDRESS
-          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
         livenessProbe:
           httpGet:
             path: /health

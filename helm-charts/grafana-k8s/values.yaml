@@ -17,16 +17,16 @@ k8s-monitoring:
       host: https://logs-prod-021.grafana.net
       writeEndpoint: /loki/api/v1/push
       secret:
-        name: grafana-cloud-credentials
+        name: grafana-cloud-loki
         namespace: monitoring
       basicAuth:
         usernameKey: logs-username
         passwordKey: logs-password
     
     tempo:
-      host: https://otlp-gateway-prod-us-west-0.grafana.net
+      host: https://tempo-prod-15-prod-us-west-0.grafana.net:443
       secret:
-        name: grafana-cloud-credentials
+        name: grafana-cloud-tempo
         namespace: monitoring
       basicAuth:
         usernameKey: otlp-username
@@ -35,7 +35,7 @@ k8s-monitoring:
     pyroscope:
       host: https://profiles-prod-008.grafana.net
       secret:
-        name: grafana-cloud-credentials
+        name: grafana-cloud-pyroscope
         namespace: monitoring
       basicAuth:
         usernameKey: profiles-username
@@ -65,6 +65,16 @@ k8s-monitoring:
       zipkin:
         enabled: true
         port: 9411
+  
+  traces:
+    enabled: true
+  
+  profiles:
+    enabled: true
+    receivers:
+      http:
+        enabled: true
+        port: 4040
   
   alloy-metrics:
     enabled: true
