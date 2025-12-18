@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pov-sim.fullname" . }}-flights
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "pov-sim.labels" . | nindent 4 }}
+    app.kubernetes.io/component: flights
+spec:
+  replicas: {{ .Values.flights.replicas }}
+  selector:
+    matchLabels:
+      {{- include "pov-sim.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: flights
+  template:
+    metadata:
+      labels:
+        {{- include "pov-sim.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: flights
+    spec:
+      containers:
+      - name: flights
+        image: "{{ .Valuies.flights.image.repository }}:{{ .Values.flights.image.tag }}"
+        imagePullPolicy: {{ .Values.flights.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 5001
+          protocol: TCP
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.name=flights,service.namespace={{ .Values.namespace }},deployment.environment={{ .Values.environment }},service.version={{ .Values.flights.image.tag}}"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4317"
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: "grpc"
+        - name: OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED
+          value: "true"
+        - name: OTEL_METRICS_EXPORTER
+          value: "otlp"
+        - name: PYROSCOPE_APPLICATION_NAME
+          value: "flights"
+        - name: PYROSCOPE_SERVER_ADDRESS
+          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        resources:
+          {{- toYaml .Values.flights.resources | nindent 10 }}

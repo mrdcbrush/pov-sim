@@ -1,0 +1,59 @@
+# Global settings
+environment: dev
+namespace: pov-sim
+
+monitoring:
+  namespace: monitoring
+  alloyReceiverService: grafana-monitoring-alloy-receiver
+
+airlines:
+  replicas: 1
+  image:
+    repository: pov-sim/airlines
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requsts:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+flights:
+  replicas: 1
+  image:
+    repository: pov-sim/flights
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5001
+  resources:
+    requsts:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+frontend:
+  replicas: 1
+  image:
+    repository: pov-sim/frontend
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    port: 3000
+    nodePort: 30080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
