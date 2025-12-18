@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         ports:
         - name: http
-          containerPort: 3000
+          containerPort: 80
           protocol: TCP
         env:
         - name: REACT_APP_AIRLINES_API_URL
@@ -36,7 +36,7 @@ spec:
         - name: REACT_APP_VERSION
           value: {{ .Values.frontend.image.tag | quote}}
         - name: REACT_APP_ENVIRONMENT
-          value: {{ .Values.environemnt | quote}}
+          value: {{ .Values.environment | quote}}
         livenessProbe:
           httpGet:
             path: /
