@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: flights
-        image: "{{ .Valuies.flights.image.repository }}:{{ .Values.flights.image.tag }}"
+        image: "{{ .Values.flights.image.repository }}:{{ .Values.flights.image.tag }}"
         imagePullPolicy: {{ .Values.flights.image.pullPolicy }}
         ports:
         - name: http

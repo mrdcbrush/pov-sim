@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "pov-sim.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "pov-sim.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: pov-sim.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ include "pov-sim.fullname" . }}-frontend
+            port:
+              number: 3000
+      - path: /api/airlines(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ include "pov-sim.fullname" . }}-airlines
+            port:
+              number: 8080
+      - path: /api/flights(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: {{ include "pov-sim.fullname" . }}-flights
+            port:
+              number: 5001
