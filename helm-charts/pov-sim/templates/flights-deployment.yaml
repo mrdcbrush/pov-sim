@@ -44,10 +44,10 @@ spec:
           value: "true"
         - name: OTEL_METRICS_EXPORTER
           value: "otlp"
-        - name: PYROSCOPE_APPLICATION_NAME
-          value: "pov-sim"
-        - name: PYROSCOPE_SERVER_ADDRESS
-          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+        # - name: PYROSCOPE_APPLICATION_NAME
+        #   value: "pov-sim"
+        # - name: PYROSCOPE_SERVER_ADDRESS
+        #   value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
         livenessProbe:
           httpGet:
             path: /health

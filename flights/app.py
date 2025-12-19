@@ -1,27 +1,11 @@
-import pyroscope
-import os
-
-# Initialize Pyroscope profiling  
-pyroscope.configure(  
-    application_name=os.getenv("PYROSCOPE_APPLICATION_NAME", "pov-sim"),  
-    server_address=os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://localhost:4040"),  
-    sample_rate=100,  
-    detect_subprocesses=True,  
-    oncpu=True,
-    gil_only=True,
-    enable_logging=True,
-    tags={
-        "service": os.getenv("NAMESPACE", "pov-sim"),
-        "pod": os.getenv("POD_NAME", "pov-sim-pod"),
-    }
-)  
-
 from flasgger import Swagger
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils import get_random_int
+from flask_pypprof import get_pprof_blueprint
 
 app = Flask(__name__)
+app.register_blueprint(get_pprof_blueprint()) 
 Swagger(app)
 CORS(app)
 
@@ -104,3 +88,4 @@ def book_flight():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+    
