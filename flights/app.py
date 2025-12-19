@@ -2,10 +2,8 @@ from flasgger import Swagger
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils import get_random_int
-from flask_pypprof import get_pprof_blueprint
 
 app = Flask(__name__)
-app.register_blueprint(get_pprof_blueprint()) 
 Swagger(app)
 CORS(app)
 

@@ -80,6 +80,12 @@ k8s-monitoring:
   
   profiles:
     enabled: true
+    ebpf:
+      enabled: true
+      targetingScheme: all
+      namespaces:
+        - pov-sim
+      demangle: python  
     receivers:
       http:
         enabled: true
