@@ -1,5 +1,5 @@
-# Use the official Node.js image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS build
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -13,8 +13,21 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Expose the port on which the app will run
-EXPOSE 3000
+# Build the app
+RUN npm run build
 
-# Start the React development server
-CMD ["npm", "start"]
+# Production stage
+FROM nginx:alpine
+
+# Copy built app
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Expose port
+EXPOSE 80
+
+# Use custom entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]

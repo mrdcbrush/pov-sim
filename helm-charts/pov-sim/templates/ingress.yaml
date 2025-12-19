@@ -12,8 +12,13 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - localhost
+    secretName: pov-sim-tls
   rules:
-  - http:
+  - host: localhost
+    http:
       paths:
       - path: /api/airlines(/|$)(.*)
         pathType: ImplementationSpecific
@@ -36,8 +41,13 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - localhost
+    secretName: pov-sim-tls
   rules:
-  - http:
+  - host: localhost
+    http:
       paths:
       - path: /api/flights(/|$)(.*)
         pathType: ImplementationSpecific
@@ -46,6 +56,34 @@ spec:
             name: {{ include "pov-sim.fullname" . }}-flights
             port:
               number: 5001
+---
+# Faro Collector Ingress - proxy to Alloy
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "pov-sim.fullname" . }}-faro
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "pov-sim.labels" . | nindent 4 }}
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - localhost
+    secretName: pov-sim-tls
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /collect
+        pathType: Prefix
+        backend:
+          service:
+            name: alloy-faro-proxy
+            port:
+              number: 12347
 ---
 # Frontend Ingress - no rewrite needed
 apiVersion: networking.k8s.io/v1
@@ -57,8 +95,13 @@ metadata:
     {{- include "pov-sim.labels" . | nindent 4 }}
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - localhost
+    secretName: pov-sim-tls
   rules:
-  - http:
+  - host: localhost
+    http:
       paths:
       - path: /
         pathType: Prefix

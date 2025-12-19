@@ -5,30 +5,52 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-
 // Import Faro
-import { initializeFaro } from '@grafana/faro-react';
+import { matchRoutes } from 'react-router-dom';
+import { initializeFaro, createReactRouterV6DataOptions, ReactIntegration, getWebInstrumentations, } from '@grafana/faro-react';
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
+
+// Add before the if statement  
+console.log('Faro URL:', process.env.REACT_APP_FARO_URL);  
+console.log('All env vars:', process.env);  
 
 //initalize Faro
 // eslint-disable-next-line no-undef
-if (process.env.REACT_APP_FARO_URL) {
-  initializeFaro({
-    // eslint-disable-next-line no-undef
-    url: process.env.REACT_APP_FARO_URL,
-    app: {
-      name: 'pov-sim-frontend',
+const faroUrl = window.ENV?.REACT_APP_FARO_URL || process.env.REACT_APP_FARO_URL;
+console.log('Initializing Faro with URL:', faroUrl);
+if (faroUrl) {
+  try {
+    initializeFaro({
       // eslint-disable-next-line no-undef
-      version: process.env.REACT_APP_VERSION || '1.0.0',
-      // eslint-disable-next-line no-undef
-      environment: process.env.REACT_APP_ENVIRONMENT || 'dev',
-    },
+      url: faroUrl,
+      app: {
+        name: 'pov-sim-frontend',
+        // eslint-disable-next-line no-undef
+        version: window.ENV?.REACT_APP_VERSION || process.env.REACT_APP_VERSION || '1.0.0',
+        // eslint-disable-next-line no-undef
+        environment: window.ENV?.REACT_APP_ENVIRONMENT || process.env.REACT_APP_ENVIRONMENT || 'dev',
+      },
     instrumentations: [
+      // eslint-disable-next-line no-undef
+      ...getWebInstrumentations({  
+      enablePerformanceInstrumentation: true,  
+      trackResources: true  
+      }),
       new TracingInstrumentation(),
+      new ReactIntegration({
+        router: createReactRouterV6DataOptions({
+          matchRoutes,
+        }),
+      }),
     ],
   });
+  console.log('Faro initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize Faro:', error);
 }
-
+} else {
+  console.warn('Faro URL not configured, skipping initialization');
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

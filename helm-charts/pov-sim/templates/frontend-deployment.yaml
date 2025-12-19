@@ -32,7 +32,10 @@ spec:
         - name: REACT_APP_FLIGHTS_API_URL
           value: "http://{{ include "pov-sim.fullname" . }}-flights.{{ .Values.namespace }}.svc.cluster.local:5001"
         - name: REACT_APP_FARO_URL
-          value: "http://{{ .Values.monitoring.alloyReceiverService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:12347/collect"
+          valueFrom:
+            secretKeyRef:
+              name: grafana-cloud-faro
+              key: token
         - name: REACT_APP_VERSION
           value: {{ .Values.frontend.image.tag | quote}}
         - name: REACT_APP_ENVIRONMENT

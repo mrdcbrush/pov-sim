@@ -40,6 +40,12 @@ k8s-monitoring:
       basicAuth:
         usernameKey: profiles-username
         passwordKey: profiles-password
+    
+    faro:
+      host: https://faro-collector-prod-us-west-0.grafana.net/collect/
+      secret:
+        name: grafana-cloud-faro
+        namespace: monitoring
 
   clusterMetrics:
     enabled: true
@@ -65,6 +71,9 @@ k8s-monitoring:
       zipkin:
         enabled: true
         port: 9411
+  
+  frontendObservability:
+    enabled: true
   
   traces:
     enabled: true
