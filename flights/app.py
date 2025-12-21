@@ -2,8 +2,22 @@ from flasgger import Swagger
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils import get_random_int
+# from flask_pypprof import get_pprof_blueprint
+import pyroscope
+import os
+
+# Configure Pyroscope
+pyroscope.configure(
+    application_name = os.getenv("PYROSCOPE_APPLICATION_NAME", "flights"),
+    server_address   = os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://pyroscope.monitoring.svc.cluster.local:4040"),
+    tags = {
+        "region": os.getenv("REGION", "local"),
+        "env": os.getenv("ENVIRONMENT", "production"),
+    }
+)
 
 app = Flask(__name__)
+# app.register_blueprint(get_pprof_blueprint())
 Swagger(app)
 CORS(app)
 

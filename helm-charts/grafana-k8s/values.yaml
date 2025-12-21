@@ -1,126 +1,125 @@
-k8s-monitoring:
-  cluster:
-    name: povsim
+cluster:  
+  name: povsim  # Changed from povsim to match your config  
 
-  externalServices:
-    prometheus:
-      host: https://prometheus-prod-36-prod-us-west-0.grafana.net
-      writeEndpoint: /api/prom/push
-      secret:
-        name: grafana-cloud-credentials
-        namespace: monitoring
-      basicAuth:
-        usernameKey: metrics-username
-        passwordKey: metrics-password
-    
-    loki:
-      host: https://logs-prod-021.grafana.net
-      writeEndpoint: /loki/api/v1/push
-      secret:
-        name: grafana-cloud-loki
-        namespace: monitoring
-      basicAuth:
-        usernameKey: logs-username
-        passwordKey: logs-password
-    
-    tempo:
-      host: https://tempo-prod-15-prod-us-west-0.grafana.net:443
-      secret:
-        name: grafana-cloud-tempo
-        namespace: monitoring
-      basicAuth:
-        usernameKey: otlp-username
-        passwordKey: otlp-password
-    
-    pyroscope:
-      host: https://profiles-prod-008.grafana.net
-      secret:
-        name: grafana-cloud-pyroscope
-        namespace: monitoring
-      basicAuth:
-        usernameKey: profiles-username
-        passwordKey: profiles-password
-    
-    faro:
-      host: https://faro-collector-prod-us-west-0.grafana.net/collect/
-      secret:
-        name: grafana-cloud-faro
-        namespace: monitoring
+externalServices:  
+  prometheus:  
+    host: https://prometheus-prod-36-prod-us-west-0.grafana.net  
+    writeEndpoint: /api/prom/push  
+    secret:  
+      name: grafana-cloud-credentials  
+      namespace: monitoring  
+    basicAuth:  
+      usernameKey: metrics-username  
+      passwordKey: metrics-password  
+  
+  loki:  
+    host: https://logs-prod-021.grafana.net  
+    writeEndpoint: /loki/api/v1/push  
+    secret:  
+      name: grafana-cloud-loki  
+      namespace: monitoring  
+    basicAuth:  
+      usernameKey: logs-username  
+      passwordKey: logs-password  
+  
+  tempo:  
+    host: https://tempo-prod-15-prod-us-west-0.grafana.net:443  
+    secret:  
+      name: grafana-cloud-tempo  
+      namespace: monitoring  
+    basicAuth:  
+      usernameKey: otlp-username  
+      passwordKey: otlp-password  
+  
+  pyroscope:  
+    host: https://profiles-prod-008.grafana.net  
+    secret:  
+      name: grafana-cloud-pyroscope  
+      namespace: monitoring  
+    basicAuth:  
+      usernameKey: profiles-username  
+      passwordKey: profiles-password  
+  
+  faro:  
+    host: https://faro-collector-prod-us-west-0.grafana.net/collect/  
+    secret:  
+      name: grafana-cloud-faro  
+      namespace: monitoring  
 
-  clusterMetrics:
-    enabled: true
-    kepler:
-      enabled: true
-  
-  clusterEvents:
-    enabled: true
-  
-  podLogs:
-    enabled: true
-  
-  applicationObservability:
-    enabled: true
-    receivers:
-      otlp:
-        grpc:
-          enabled: true
-          port: 4317
-        http:
-          enabled: true
-          port: 4318
-      zipkin:
-        enabled: true
-        port: 9411
-  
-  frontendObservability:
-    enabled: true
-  
-  traces:
-    enabled: true
-  
-  profiles:
-    enabled: true
-    ebpf:
-      enabled: true
-      targetingScheme: all
-      namespaces:
-        - pov-sim
-      demangle: python  
-    receivers:
-      http:
-        enabled: true
-        port: 4040
-  
-  alloy-metrics:
-    enabled: true
-  
-  alloy-singleton:
-    enabled: true
-  
-  alloy-logs:
-    enabled: true
-  
-  alloy-receiver:
-    enabled: true
-    alloy:
-      extraPorts:
-        - name: otlp-grpc
-          port: 4317
-          targetPort: 4317
-          protocol: TCP
-        - name: otlp-http
-          port: 4318
-          targetPort: 4318
-          protocol: TCP
-        - name: zipkin
-          port: 9411
-          targetPort: 9411
-          protocol: TCP
-        - name: pyroscope
-          port: 4040
-          targetPort: 4040
-          protocol: TCP
-        - name: faro
-          port: 12347
-          targetPort: 12347
-          protocol: TCP
+clusterMetrics:  
+  enabled: true  
+  kepler:  
+    enabled: true  
+
+clusterEvents:  
+  enabled: true  
+
+podLogs:  
+  enabled: true  
+
+applicationObservability:  
+  enabled: true  
+  receivers:  
+    otlp:  
+      grpc:  
+        enabled: true  
+        port: 4317  
+      http:  
+        enabled: true  
+        port: 4318  
+    zipkin:  
+      enabled: true  
+      port: 9411  
+
+frontendObservability:  
+  enabled: true  
+
+traces:  
+  enabled: true  
+
+profiles:  
+  enabled: true
+  receivers:  
+    http:  
+      enabled: true  
+      port: 4040  
+
+# Subchart overrides  
+alloy-profiles:  
+  alloy:  
+    securityContext:  
+      privileged: true  
+      runAsGroup: 0  
+      runAsUser: 0  
+    extraPorts:  
+      - name: pyroscope-http  
+        port: 4040  
+        targetPort: 4040  
+        protocol: TCP  
+  controller:  
+    hostPID: true  
+
+alloy-receiver:  
+  enabled: true  
+  alloy:  
+    extraPorts:  
+      - name: otlp-grpc  
+        port: 4317  
+        targetPort: 4317  
+        protocol: TCP  
+      - name: otlp-http  
+        port: 4318  
+        targetPort: 4318  
+        protocol: TCP  
+      - name: zipkin  
+        port: 9411  
+        targetPort: 9411  
+        protocol: TCP  
+      - name: pyroscope  
+        port: 4040  
+        targetPort: 4040  
+        protocol: TCP  
+      - name: faro  
+        port: 12347  
+        targetPort: 12347  
+        protocol: TCP  
