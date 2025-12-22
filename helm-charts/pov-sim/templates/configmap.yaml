@@ -6,6 +6,6 @@ metadata:
     {{- include "pov-sim.labels" . | nindent 4 }}
 data:
   environment: {{ .Values.environment | quote }}
-  otel-collector-endpoint: "http://grafana-monitoring-alloy-receiver.monitoring.svc.cluster.local:4317"
-  pyroscope-endpoint: "http://grafana-monitoring-alloy-receiver.monitoring.svc.cluster.local:4040"
-  faro-endpoint: "http://grafana-monitoring-alloy-receiver.monitoring.svc.cluster.local:12347/collect"
+  otel-collector-endpoint: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4317"
+  pyroscope-endpoint: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+  faro-endpoint: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:12347/collect"

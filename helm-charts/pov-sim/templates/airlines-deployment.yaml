@@ -37,13 +37,13 @@ spec:
           value: "http/protobuf"
         - name: OTEL_METRICS_EXPORTER
           value: "otlp"
-        # Pyroscope disabled until receiver is configured
-        #- name: PYROSCOPE_APPLICATION_NAME
-        #  value: "airlines"
-        #- name: PYROSCOPE_SERVER_ADDRESS
-        #  value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
-        #- name: PYROSCOPE_FORMAT
-        #  value: "jfr"
+        # Pyroscope configuration
+        - name: PYROSCOPE_APPLICATION_NAME
+          value: "airlines"
+        - name: PYROSCOPE_SERVER_ADDRESS
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4040"
+        - name: PYROSCOPE_FORMAT
+          value: "jfr"
         - name: CORS_ALLOWED_ORIGINS
           value: "*"
         livenessProbe:
