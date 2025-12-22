@@ -1,0 +1,413 @@
+apiVersion: collectors.grafana.com/v1alpha1
+kind: Alloy
+metadata:
+  name: alloy-minikube
+  namespace: monitoring
+spec:
+  # Run as DaemonSet for Node Logs and eBPF Profiling
+  controller:
+    type: daemonset
+    hostPID: true # Required for eBPF to see other processes
+  
+  # The Alloy Configuration (River)
+  alloy:
+    # Required for eBPF Profiling
+    securityContext:
+      privileged: true
+      runAsUser: 0
+      runAsGroup: 0
+
+    # Map your Existing Kubernetes Secrets to Environment Variables
+    extraEnv:
+      # Prometheus
+      - name: PROM_USER
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-credentials
+            key: username
+      - name: PROM_PASS
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-credentials
+            key: password
+      - name: PROM_URL
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-credentials
+            key: url
+      # Loki
+      - name: LOKI_USER
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-loki
+            key: username
+      - name: LOKI_PASS
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-loki
+            key: password
+      - name: LOKI_URL
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-loki
+            key: url
+      # Tempo
+      - name: TEMPO_USER
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-tempo
+            key: username
+      - name: TEMPO_PASS
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-tempo
+            key: password
+      - name: TEMPO_ENDPOINT
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-tempo
+            key: endpoint
+      # Pyroscope
+      - name: PYRO_USER
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-pyroscope
+            key: username
+      - name: PYRO_PASS
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-pyroscope
+            key: password
+      - name: PYRO_URL
+        valueFrom:
+          secretKeyRef:
+            name: grafana-cloud-pyroscope
+            key: url
+
+    # Expose ports for OTLP, Pyroscope, and Faro
+    extraPorts:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP
+      - name: pyroscope
+        port: 4040
+        targetPort: 4040
+        protocol: TCP
+      - name: faro
+        port: 12347
+        targetPort: 12347
+        protocol: TCP
+
+    configMap:
+      content: |
+        // ==============================================================================  
+        // KUBERNETES MONITORING MODULE (Core: cAdvisor, Kubelet)
+        // ==============================================================================  
+
+        // Discover kube-state-metrics service  
+        discovery.kubernetes "kube_state_metrics" {  
+          role = "service"  
+          namespaces {  
+            names = ["kube-system"]  
+          }  
+        }  
+
+        discovery.relabel "kube_state_metrics" {  
+          targets = discovery.kubernetes.kube_state_metrics.targets  
+
+          // Only target kube-state-metrics service  
+          rule {  
+            source_labels = ["__meta_kubernetes_service_name"]  
+            regex         = "kube-state-metrics"  
+            action        = "keep"  
+          }  
+          
+          rule {  
+            source_labels = ["__meta_kubernetes_namespace"]  
+            target_label  = "namespace"  
+          }  
+          
+          rule {  
+            replacement  = "povsim"  
+            target_label = "cluster"  
+          }  
+        }  
+
+        prometheus.scrape "kube_state_metrics" {  
+          targets         = discovery.relabel.kube_state_metrics.output  
+          forward_to      = [prometheus.remote_write.grafana_cloud.receiver]  
+          scrape_interval = "60s"  
+        }  
+
+        // Kubelet metrics for cluster state  
+        discovery.kubernetes "kubelet" {  
+          role = "node"  
+        }  
+
+        discovery.relabel "kubelet" {  
+          targets = discovery.kubernetes.kubelet.targets  
+
+          rule {  
+            source_labels = ["__meta_kubernetes_node_name"]  
+            target_label  = "node"  
+          }  
+          
+          rule {  
+            replacement  = "povsim"  
+            target_label = "cluster"  
+          }  
+          
+          rule {  
+            replacement  = "https"  
+            target_label = "__scheme__"  
+          }  
+          
+          rule {  
+            replacement  = "/metrics"  
+            target_label = "__metrics_path__"  
+          }  
+        }  
+
+        prometheus.scrape "kubelet" {  
+          targets           = discovery.relabel.kubelet.output  
+          forward_to        = [prometheus.remote_write.grafana_cloud.receiver]  
+          scrape_interval   = "60s"  
+          bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"  
+          tls_config {  
+            insecure_skip_verify = true  
+          }  
+        }
+
+        discovery.relabel "kubelet_resource" {  
+          targets = discovery.kubernetes.kubelet.targets  
+
+          rule {  
+            source_labels = ["__meta_kubernetes_node_name"]  
+            target_label  = "node"  
+          }  
+          
+          rule {  
+            replacement  = "povsim"  
+            target_label = "cluster"  
+          }  
+          
+          rule {  
+            replacement  = "https"  
+            target_label = "__scheme__"  
+          }  
+          
+          rule {  
+            replacement  = "/metrics/resource"  
+            target_label = "__metrics_path__"  
+          }  
+        }  
+
+        prometheus.scrape "kubelet_resource" {  
+          targets           = discovery.relabel.kubelet_resource.output  
+          forward_to        = [prometheus.remote_write.grafana_cloud.receiver]  
+          scrape_interval   = "60s"  
+          bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"  
+          tls_config {  
+            insecure_skip_verify = true  
+          }  
+        }
+
+        // ==============================================================================  
+        // 1. KUBERNETES NODE MONITORING  
+        // ==============================================================================  
+
+        discovery.kubernetes "k8s_nodes" {  
+          role = "node"  
+        }  
+
+        discovery.relabel "k8s_nodes" {  
+          targets = discovery.kubernetes.k8s_nodes.targets  
+
+          rule {  
+            source_labels = ["__meta_kubernetes_node_name"]  
+            target_label  = "node"  
+          }  
+          rule {  
+            replacement   = "https"  
+            target_label  = "__scheme__"  
+          }  
+          rule {  
+            replacement   = "/metrics/cadvisor"  
+            target_label  = "__metrics_path__"  
+          }  
+        }  
+
+        prometheus.scrape "k8s_nodes" {  
+          targets    = discovery.relabel.k8s_nodes.output  
+          
+          forward_to = [prometheus.remote_write.grafana_cloud.receiver]  
+          
+          scrape_interval = "60s"  
+          bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"  
+          tls_config {  
+            insecure_skip_verify = true  
+          }  
+        }  
+
+        discovery.kubernetes "k8s_pods" {  
+          role = "pod"  
+        }  
+
+        discovery.relabel "k8s_pods" {  
+          targets = discovery.kubernetes.k8s_pods.targets  
+
+          rule {  
+            source_labels = ["__meta_kubernetes_namespace"]  
+            target_label  = "namespace"  
+          }  
+          rule {  
+            source_labels = ["__meta_kubernetes_pod_name"]  
+            target_label  = "pod"  
+          }  
+          rule {  
+            source_labels = ["__meta_kubernetes_pod_container_name"]  
+            target_label  = "container"  
+          }  
+          
+          rule {  
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]  
+            target_label  = "service"  
+          }  
+
+          rule {  
+            source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component"]  
+            target_label  = "service"  
+          }  
+          
+          rule {  
+            source_labels = ["__meta_kubernetes_pod_label_app"]  
+            target_label  = "service"  
+            regex         = "(.+)"  
+          }  
+
+          rule {  
+            source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]  
+            action        = "replace"  
+            regex         = "([^:]+)(?::\\d+)?;(\\d+)"  
+            replacement   = "$1:$2"  
+            target_label  = "__address__"  
+          }  
+        }  
+
+        // ---------------------------------------------------------------------  
+        // 2. METRICS (Prometheus -> Grafana Cloud)  
+        // ---------------------------------------------------------------------  
+        prometheus.scrape "default" {  
+          targets    = discovery.relabel.k8s_pods.output  
+          forward_to = [prometheus.remote_write.grafana_cloud.receiver]  
+          scrape_interval = "15s"  
+        }  
+
+        prometheus.remote_write "grafana_cloud" {  
+          endpoint {  
+            url = env("PROM_URL")  
+            basic_auth {  
+              username = env("PROM_USER")  
+              password = env("PROM_PASS")  
+            }  
+          }  
+          external_labels = { cluster = "povsim" }  
+        }  
+
+        // ---------------------------------------------------------------------  
+        // 3. LOGS (Loki -> Grafana Cloud)  
+        // ---------------------------------------------------------------------  
+        loki.source.kubernetes "pod_logs" {  
+          targets    = discovery.relabel.k8s_pods.output  
+          forward_to = [loki.process.add_labels.receiver]  
+        }  
+
+        loki.process "add_labels" {  
+          forward_to = [loki.write.grafana_cloud.receiver]  
+          
+          stage.static_labels {  
+              values = { cluster = "povsim" }  
+          }  
+        }  
+
+        loki.write "grafana_cloud" {  
+          endpoint {  
+            url = env("LOKI_URL")  
+            basic_auth {  
+              username = env("LOKI_USER")  
+              password = env("LOKI_PASS")  
+            }  
+          }  
+        }  
+
+        // ---------------------------------------------------------------------  
+        // 4. TRACES (Tempo -> Grafana Cloud)  
+        // ---------------------------------------------------------------------  
+        otelcol.auth.basic "grafana_cloud" {  
+          username = env("TEMPO_USER")  
+          password = env("TEMPO_PASS")  
+        }  
+
+        otelcol.receiver.otlp "default" {  
+          grpc { endpoint = "0.0.0.0:4317" }  
+          http { endpoint = "0.0.0.0:4318" }  
+          output {  
+            metrics = [otelcol.exporter.prometheus.default.input]  
+            logs    = [otelcol.exporter.loki.default.input]  
+            traces  = [otelcol.exporter.otlp.grafana_cloud.input]  
+          }  
+        }  
+
+        otelcol.exporter.prometheus "default" {  
+          forward_to = [prometheus.remote_write.grafana_cloud.receiver]  
+        }  
+
+        otelcol.exporter.loki "default" {  
+          forward_to = [loki.write.grafana_cloud.receiver]  
+        }  
+
+        otelcol.receiver.zipkin "default" {  
+          endpoint = "0.0.0.0:9411"  
+          output {  
+            traces = [otelcol.exporter.otlp.grafana_cloud.input]  
+          }  
+        }  
+
+        otelcol.exporter.otlp "grafana_cloud" {  
+          client {  
+            endpoint = env("TEMPO_ENDPOINT")  
+            auth     = otelcol.auth.basic.grafana_cloud.handler  
+          }  
+        }  
+
+        // ---------------------------------------------------------------------  
+        // 5. PROFILES (Pyroscope -> Grafana Cloud)  
+        // ---------------------------------------------------------------------  
+        pyroscope.ebpf "default" {  
+          forward_to = [pyroscope.write.grafana_cloud.receiver]  
+          targets    = discovery.relabel.k8s_pods.output  
+        }  
+
+        pyroscope.receive_http "push_api" {  
+          http {  
+            listen_address = "0.0.0.0"  
+            listen_port = 4040  
+          }  
+          forward_to = [pyroscope.write.grafana_cloud.receiver]  
+        }  
+
+        pyroscope.write "grafana_cloud" {  
+          endpoint {  
+            url = env("PYRO_URL")  
+            basic_auth {  
+              username = env("PYRO_USER")  
+              password = env("PYRO_PASS")  
+            }  
+          }  
+          external_labels = { cluster = "povsim" }  
+        }  
