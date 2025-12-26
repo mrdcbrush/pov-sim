@@ -19,7 +19,7 @@ LINE_SEPARATOR="----------------------------------------------------------"
 
 DEFAULT_ERROR_RATE=0
 DEFAULT_DURATION=60
-DEFAULT_BASE_URL="http://localhost:8080"
+DEFAULT_BASE_URL="https://localhost:8443"
 
 BASIC_GET_ENDPOINTS=(
     "/"
@@ -76,7 +76,7 @@ run_loadgen() {
         for i in "${BASIC_GET_ENDPOINTS[@]}"; do
             ENDPOINT="$BASE_URL$i"
             echo "\nSending GET request: $ENDPOINT..."
-            curl $ENDPOINT
+            curl -k $ENDPOINT
             echo "\n"
         done
 
@@ -89,7 +89,7 @@ run_loadgen() {
         fi
         ENDPOINT="$BASE_URL$GET_AIRLINES_ENDPOINT$QUERY_PARAMS"
         echo "\nSending GET request: $ENDPOINT"
-        curl $ENDPOINT
+        curl -k $ENDPOINT
         echo "\n"
 
         sleep 1

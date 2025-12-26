@@ -26,7 +26,7 @@ COPY ./pyroscope.jar pyroscope.jar
 ENV OTEL_RESOURCE_ATTRIBUTES="service.name=airlines,service.namespace=pov-sim,deployment.environment=dev,service.version=v2"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-ENV OTEL_METRICS_EXPORTER=console
+ENV OTEL_METRICS_EXPORTER=otlp
 ENV OTEL_TRACES_EXPORTER=console,otlp
 
 # Set Pyroscope environment variables  

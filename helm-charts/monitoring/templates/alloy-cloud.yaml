@@ -325,7 +325,33 @@ spec:
           
           stage.static_labels {  
               values = { cluster = "povsim" }  
-          }  
+          }
+
+          // 1. Handle JSON logs (flights)
+          stage.match {
+            selector = "{service=\"flights\"}"
+            stage.json {
+              expressions = {
+                level = "level",
+                msg   = "message",
+              }
+            }
+            stage.labels {
+              values = { level = "level" }
+            }
+          }
+
+          // 2. Handle Java logs (airlines)
+          stage.match {
+            selector = "{service=\"airlines\"}"
+            stage.regex {
+              // Matches: TIMESTAMP LEVEL PID --- [THREAD] LOGGER : MESSAGE
+              expression = `^(?P<agent_ts>\S+)\s+(?P<level>\S+)\s+\d+\s+---\s+\[(?P<thread>.*?)\]\s+(?P<logger>\S+)\s+:\s+(?P<msg>.*)$`
+            }
+            stage.labels {
+              values = { level = "level" }
+            }
+          }
         }  
 
         loki.write "grafana_cloud" {  

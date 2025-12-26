@@ -19,7 +19,7 @@ LINE_SEPARATOR="----------------------------------------------------------"
 
 DEFAULT_ERROR_RATE=0
 DEFAULT_DURATION=60
-DEFAULT_BASE_URL="http://localhost:5001"
+DEFAULT_BASE_URL="https://localhost:8443"
 
 BASIC_GET_ENDPOINTS=(
     "/"
@@ -94,7 +94,7 @@ run_loadgen() {
         for i in "${BASIC_GET_ENDPOINTS[@]}"; do
             ENDPOINT="$BASE_URL$i"
             echo "\nSending GET request: $ENDPOINT..."
-            curl $ENDPOINT
+            curl -k $ENDPOINT
         done
 
         # Ping GET flights
@@ -107,7 +107,7 @@ run_loadgen() {
             fi
             ENDPOINT="$BASE_URL$path$QUERY_PARAMS"
             echo "\nSending GET request: $ENDPOINT"
-            curl $ENDPOINT
+            curl -k $ENDPOINT
         done
 
         # Ping POST flight
@@ -121,7 +121,7 @@ run_loadgen() {
                 fi
                 ENDPOINT="$BASE_URL$POST_FLIGHT_ENDPOINT$QUERY_PARAMS"
                 echo "\nSending POST request: $ENDPOINT"
-                curl -X POST $ENDPOINT
+                curl -X POST -k $ENDPOINT
             done
         done
 

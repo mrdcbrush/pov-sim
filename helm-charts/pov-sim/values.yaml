@@ -10,7 +10,7 @@ airlines:
   replicas: 1
   image:
     repository: pov-sim/airlines
-    tag: v1.0.0
+    tag: v1.0.2
     pullPolicy: IfNotPresent
   service:
     type: ClusterIP

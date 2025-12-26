@@ -4,21 +4,26 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @CrossOrigin(origins = "${CORS_ALLOWED_ORIGINS:http://localhost:3000}") // Allow requests from React app
 public class AirlinesController {
+	private static final Logger logger = LoggerFactory.getLogger(AirlinesController.class);
 	private static String[] airlines = { "AA", "DL", "UA" };
 
 	@Operation(summary = "Index", description = "No-op hello world")
 	@GetMapping("/")
 	public String index() {
+		logger.info("Received request for index");
 		return "Greetings from Spring Boot!";
 	}
 
 	@Operation(summary = "Health check", description = "Performs a simple health check")
 	@GetMapping("/health")
 	public String health() {
+		logger.debug("Received request for health check");
 		return "Health check passed!";
 	}
 
@@ -27,7 +32,9 @@ public class AirlinesController {
 	public String getUserById(
 			@Parameter(description = "Optional flag - set raise to true to raise an exception") 
 			@RequestParam(value = "raise", required = false, defaultValue = "false") boolean raise) {
+		logger.info("Received request for airlines. raise={}", raise);
 		if (raise) {
+			logger.error("Raising exception as requested");
 			throw new RuntimeException("Exception raised");
 		}
 		return String.join(", ", airlines);
