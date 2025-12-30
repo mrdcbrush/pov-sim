@@ -5,3 +5,5 @@ alloy/config.alloy
 .DS_Store
 *.jar
 scripts/*
+certs/*
+helm-charts/monitoring/templates/grafana-cloud-secrets.yaml
