@@ -28,13 +28,9 @@ spec:
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "service.name=airlines,service.namespace={{ .Values.namespace }},deployment.environment={{ .Values.environment }},service.version={{ .Values.airlines.image.tag }}"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318"
-        - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/traces"
-        - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
-          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4318/v1/metrics"
+          value: "http://{{ .Values.monitoring.alloyService }}.{{ .Values.monitoring.namespace }}.svc.cluster.local:4317"
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "http/protobuf"
+          value: "grpc"
         - name: OTEL_METRICS_EXPORTER
           value: "otlp"
         # Pyroscope configuration
