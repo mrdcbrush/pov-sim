@@ -7,7 +7,11 @@ pyroscope.configure(
     server_address=os.getenv("PYROSCOPE_SERVER_ADDRESS", "http://alloy:4040"),  
     sample_rate=100,  
     detect_subprocesses=True,  
-    oncpu=True,  
+    oncpu=True,
+    tags={  
+        "service.instance.id": os.getenv("HOSTNAME"),  
+        "namespace": "pov-sim"  
+    }
 )  
 
 from flasgger import Swagger

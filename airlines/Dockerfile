@@ -23,10 +23,12 @@ COPY ./grafana-opentelemetry-java.jar grafana-opentelemetry-java.jar
 COPY ./pyroscope.jar pyroscope.jar
 
 # Default OTEL config (override at runtime with -e)
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=airlines,service.namespace=pov-sim,deployment.environment=dev,service.version=v2"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=airlines,service.namespace=pov-sim,deployment.environment=dev,service.version=v2,service.instance.id=airlines-${HOSTNAME}"
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
-ENV OTEL_METRICS_EXPORTER=console
+ENV OTEL_METRICS_EXPORTER=console,otlp 
+ENV OTEL_LOGS_EXPORTER=console,otlp
+ENV OTEL_TRACES_EXPORTER=console,otlp
 ENV OTEL_TRACES_EXPORTER=console,otlp
 
 # Set Pyroscope environment variables  
@@ -35,7 +37,8 @@ ENV PYROSCOPE_SERVER_ADDRESS=http://alloy:4040
 ENV PYROSCOPE_FORMAT=jfr  
 ENV PYROSCOPE_PROFILER_EVENT=cpu  
 ENV PYROSCOPE_PROFILER_ALLOC=512k  
-ENV PYROSCOPE_PROFILER_LOCK=10ms  
+ENV PYROSCOPE_PROFILER_LOCK=10ms
+ENV PYROSCOPE_LABELS=service.instance.id=airlines-${HOSTNAME},namespace=pov-sim  
 
 # Expose the port the application runs on
 EXPOSE 8080
