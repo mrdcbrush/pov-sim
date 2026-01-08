@@ -1,0 +1,38 @@
+# Default values for monitoring.
+
+# Subchart configurations
+prometheus:
+  enabled: true
+  alertmanager:
+    enabled: false
+  prometheus-pushgateway:
+    enabled: false
+  server:
+    persistentVolume:
+      enabled: false
+    retention: "15d"
+  
+  # Disable bundled components that overlap with our Alloy setup or static templates
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+
+opencost:
+  enabled: true
+  opencost:
+    exporter:
+      enabled: true
+    prometheus:
+      enabled: false
+      external:
+        # Connect to the sibling prometheus service in the same namespace.
+        # Format: http://<release-name>-prometheus-server.<namespace>.svc.cluster.local
+        # We assume the release name will be "monitoring-stack"
+        url: "http://monitoring-stack-prometheus-server.monitoring.svc.cluster.local"
+    ui:
+      enabled: false
+
+# Legacy/Manual KSM support (if used in templates)
+kube-state-metrics:
+  enabled: true

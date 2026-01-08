@@ -315,7 +315,7 @@ spec:
         discovery.kubernetes "opencost" {
           role = "endpoints"
           namespaces {
-            names = ["opencost"]
+            names = ["monitoring", "opencost"]
           }
         }
 
@@ -324,7 +324,7 @@ spec:
 
           rule {
             source_labels = ["__meta_kubernetes_service_name"]
-            regex = "opencost"
+            regex = ".*opencost"
             action = "keep"
           }
           
