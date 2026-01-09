@@ -4,7 +4,6 @@ node_modules
 alloy/config.alloy
 .DS_Store
 *.jar
-*.tgz
 scripts/*
 certs/*
 helm-charts/monitoring/templates/grafana-cloud-secrets.yaml
